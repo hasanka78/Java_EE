@@ -59,11 +59,11 @@ public class StudentController extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		Student student = new Student();
-		//HttpSession session = request.getSession();
+		
 		Map<String, String> messages = new HashMap<String, String>();
-		if(validateInput(request,messages,student)){
-			//processStudent(request,student);
+		if(validateInput(request,messages)){
+			Student student = new Student();
+			processStudent(request,student);
 			if( student.getStudentId()==0 ){
 				dao.addStudent(student);
 				messages.put("success", "successfully added");
@@ -73,16 +73,14 @@ public class StudentController extends HttpServlet {
 				dao.updateStudent(student);
 				messages.put("success", "successfully updated");
 			}
-
-
-			//request.setAttribute("messages", messages);
-			//session.setAttribute("messages", messages);
 			response.sendRedirect("StudentController?action=listStudent");	
 
 		}
 		else{
+			Student studentErrorObject = new Student();
+			processStudent(request,studentErrorObject);
 			messages.put("failure", "form is invalid");
-			request.setAttribute("student", student);
+			request.setAttribute("student", studentErrorObject);
 			request.setAttribute("messages", messages);
 			RequestDispatcher view = request.getRequestDispatcher(INSERT_OR_EDIT);
 			view.forward(request, response);
@@ -105,7 +103,7 @@ public class StudentController extends HttpServlet {
 		student.setStudentId(studentId);
 	}
 
-	private boolean validateInput(HttpServletRequest request, Map<String, String> messages, Student student) {
+	private boolean validateInput(HttpServletRequest request, Map<String, String> messages) {
 		boolean state = true;
 		if(request.getParameter("firstName") == null ||request.getParameter("firstName").isEmpty()){
 			state = false;
@@ -121,7 +119,6 @@ public class StudentController extends HttpServlet {
 			messages.put("errorUerName", "name is too long");
 		}
 		
-		processStudent(request,student);
 		
 		return state;
 	}
